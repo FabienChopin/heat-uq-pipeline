@@ -10,59 +10,14 @@ readme = "README.md"
 license = "MIT"
 authors = [{ name = "Fabien Chopin" }]
 requires-python = ">=3.11"
-dependencies = ["numpy>=1.26"]
+dependencies = ["jax"]
 classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
-    "Typing :: Typed",
 ]
 
 [project.urls]
 Repository = "https://github.com/FabienChopin/heat-uq-pipeline"
 
-[dependency-groups]
-dev = [
-    "pytest>=8.0",
-    "pytest-cov>=5.0",
-    "mypy>=1.10",
-    "ruff>=0.6",
-]
-
 [tool.hatch.build.targets.wheel]
 packages = ["src/heatuq"]
-
-[tool.ruff]
-line-length = 100
-target-version = "py311"
-
-[tool.ruff.lint]
-select = ["E", "F", "I", "UP", "B", "C4", "SIM", "N", "RUF", "D"]
-ignore = ["D203", "D212"]
-
-[tool.ruff.lint.pydocstyle]
-convention = "numpy"
-
-[tool.ruff.lint.per-file-ignores]
-"tests/*" = ["D", "S101"]
-
-[tool.mypy]
-python_version = "3.12"
-strict = true
-warn_unreachable = true
-files = ["src", "tests"]
-
-[[tool.mypy.overrides]]
-module = "tests.*"
-disallow_untyped_defs = false
-
-[tool.pytest.ini_options]
-addopts = "-ra --cov=heatuq --cov-report=term-missing --cov-report=xml"
-testpaths = ["tests"]
-
-[tool.coverage.run]
-source = ["src/heatuq"]
-branch = true
-
-[tool.coverage.report]
-fail_under = 90
-exclude_lines = ["pragma: no cover", "if TYPE_CHECKING:"]

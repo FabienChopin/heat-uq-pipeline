@@ -1,12 +1,12 @@
 # heat-uq-pipeline
 
-[![CI](https://github.com/FabienChopin/heat-uq-pipeline/actions/workflows/ci.yml/badge.svg)](https://github.com/FabienChopin/heat-uq-pipeline/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-A 2D transient heat-diffusion finite-difference solver. This is the first phase of a
-larger pipeline: future phases will use this solver to generate Monte Carlo datasets
-and train an MLP surrogate for Bayesian calibration of the physical parameters. **This
-repo currently ships only the solver.**
+A 2D transient heat-diffusion solver, differentiable with respect to its physical
+parameters. This is the first phase of a larger pipeline: future phases will use
+this solver to generate Monte Carlo datasets and train an MLP surrogate for
+Bayesian calibration of the physical parameters. **This repo currently ships only
+the solver.**
 
 ## Equation
 
@@ -21,50 +21,47 @@ diffusivity), `amplitude`, `x0`, `y0`, and `sigma` (the Gaussian source term).
 
 ## Method
 
-Explicit forward-Euler time-stepping with a 5-point Laplacian stencil, fully
-vectorized with numpy. The timestep is auto-selected from the CFL stability limit
-unless you supply one explicitly (an unstable explicit `dt` raises `ValueError`).
+Explicit forward-Euler time-stepping with a 5-point Laplacian stencil, written in
+`jax.numpy` so the output is differentiable w.r.t. the 5 physical parameters via
+`jax.jacfwd`. Use forward-mode (`jacfwd`) specifically: there are only 5 inputs
+but `nx * ny` outputs, and reverse-mode (`jax.jacobian`/`jax.grad`) would be far
+slower here since its cost scales with the number of outputs, not inputs.
+
+`dt` must be passed explicitly — it can't be auto-selected from `alpha` inside the
+function, because `alpha` may itself be a traced (differentiated) value, and the
+number of time steps needs to be fixed before running. Use `compute_stable_dt`
+with a concrete `alpha` beforehand to pick a safe `dt`.
 
 ## Install
 
 ```bash
 git clone https://github.com/FabienChopin/heat-uq-pipeline.git
 cd heat-uq-pipeline
-uv sync --all-groups
+uv sync
 ```
 
 ## Usage
 
 ```python
-from heatuq import solve_heat_equation_2d
+import jax
+from heatuq import compute_stable_dt, solve_heat_equation_2d
 
-times, T = solve_heat_equation_2d(
-    alpha=0.01,
-    amplitude=5.0,
-    x0=0.5,
-    y0=0.5,
-    sigma=0.05,
-    nx=101,
-    ny=101,
-    t_end=0.5,
-    save_times=(0.1, 0.25, 0.5),
+dx = dy = 1.0 / 100  # nx=ny=101 by default
+dt = compute_stable_dt(alpha=0.01, dx=dx, dy=dy)
+
+T = solve_heat_equation_2d(alpha=0.01, amplitude=5.0, x0=0.5, y0=0.5, sigma=0.05, t_end=0.5, dt=dt)
+
+# Derivatives of the whole field w.r.t. the 5 physical parameters
+# (jacfwd, not jacobian/jacrev: 5 inputs but nx*ny outputs):
+jac = jax.jacfwd(solve_heat_equation_2d, argnums=(0, 1, 2, 3, 4))
+dT_dalpha, dT_damplitude, dT_dx0, dT_dy0, dT_dsigma = jac(
+    0.01, 5.0, 0.5, 0.5, 0.05, t_end=0.5, dt=dt
 )
-print(times.shape, T.shape)  # (3,) (3, 101, 101)
-```
-
-`T[k]` is the temperature field at `times[k]`, shape `(ny, nx)`, with `T[k][j, i]`
-corresponding to grid point `(x[i], y[j])`.
-
-## Development
-
-```bash
-uv run pytest        # tests, including a manufactured-solution convergence check
-uv run ruff check .  # lint
-uv run mypy src tests  # type check
 ```
 
 ## Roadmap
 
+- Tests, CI, and the rest of the "professional" tooling, once the API has settled
 - Monte Carlo dataset generation over the 5 physical parameters
 - MLP surrogate model training
 - Bayesian calibration of the physical parameters
