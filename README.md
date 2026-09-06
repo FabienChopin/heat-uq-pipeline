@@ -32,6 +32,15 @@ function, because `alpha` may itself be a traced (differentiated) value, and the
 number of time steps needs to be fixed before running. Use `compute_stable_dt`
 with a concrete `alpha` beforehand to pick a safe `dt`.
 
+## Limits for UQ
+
+Fixing `dt` once (rather than per-`alpha`) keeps the solver traceable, but it
+also means discretization error isn't uniform across an `alpha` sweep — it
+shows up as numerical noise in results and derivatives, worst near the top of
+the explored range. Not addressed properly yet. In practice, `dt` should be
+fixed once per full study — dataset generation, surrogate training, and
+calibration for a given `alpha` prior — rather than re-picked per batch.
+
 ## Install
 
 ```bash
