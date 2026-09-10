@@ -216,3 +216,6 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Convergence-study script output (scripts/convergence_study.py)
+scripts/output/

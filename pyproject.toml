@@ -21,3 +21,9 @@ Repository = "https://github.com/FabienChopin/heat-uq-pipeline"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/heatuq"]
+
+[dependency-groups]
+dev = [
+    "matplotlib>=3.11.1",
+    "pytest>=9.1.1",
+]
