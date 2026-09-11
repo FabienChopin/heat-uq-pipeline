@@ -1,23 +1,23 @@
-name: Convergence
+name: Solver checks
 
 on:
   push:
     paths:
       - "src/heatuq/solver.py"
-      - "tests/test_convergence.py"
+      - "tests/**"
       - "pyproject.toml"
       - "uv.lock"
       - ".github/workflows/convergence.yml"
   pull_request:
     paths:
       - "src/heatuq/solver.py"
-      - "tests/test_convergence.py"
+      - "tests/**"
       - "pyproject.toml"
       - "uv.lock"
       - ".github/workflows/convergence.yml"
 
 jobs:
-  convergence:
+  solver-checks:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -25,4 +25,4 @@ jobs:
         with:
           enable-cache: true
       - run: uv sync --group dev
-      - run: uv run pytest tests/test_convergence.py -v
+      - run: uv run pytest tests/ -v
