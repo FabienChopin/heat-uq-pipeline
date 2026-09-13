@@ -1,0 +1,29 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "heatuq"
+version = "0.1.0"
+description = "A 2D transient heat-diffusion finite-difference solver."
+readme = "README.md"
+license = "MIT"
+authors = [{ name = "Fabien Chopin" }]
+requires-python = ">=3.11"
+dependencies = ["jax"]
+classifiers = [
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+[project.urls]
+Repository = "https://github.com/FabienChopin/heat-uq-pipeline"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/heatuq"]
+
+[dependency-groups]
+dev = [
+    "matplotlib>=3.11.1",
+    "pytest>=9.1.1",
+]
