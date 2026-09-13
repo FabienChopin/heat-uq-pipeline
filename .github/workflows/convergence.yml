@@ -1,13 +1,6 @@
 name: Solver checks
 
 on:
-  push:
-    paths:
-      - "src/heatuq/solver.py"
-      - "tests/**"
-      - "pyproject.toml"
-      - "uv.lock"
-      - ".github/workflows/convergence.yml"
   pull_request:
     paths:
       - "src/heatuq/solver.py"
